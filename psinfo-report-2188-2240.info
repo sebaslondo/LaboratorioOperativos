@@ -1,0 +1,20 @@
+Pid: 2188
+El nombre del proceso es: 	rtkit-daemon
+El estado del proceso es: 	S (sleeping)
+Tamaño total de la imagen de memoria: 	  183544 kB
+	Tamaño de la memoria en la región DATA: 	   17000 kB
+	Tamaño de la memoria en la región STACK: 	     132 kB
+	Tamaño de la memoria en la región TEXT: 	      60 kB
+Número de cambios de contexto realizados (voluntarios): 	24
+Número de cambios de contexto realizados (no voluntarios): 	0
+
+Pid: 2240
+El nombre del proceso es: 	blueberry-obex-
+El estado del proceso es: 	S (sleeping)
+Tamaño total de la imagen de memoria: 	  442908 kB
+	Tamaño de la memoria en la región DATA: 	   35472 kB
+	Tamaño de la memoria en la región STACK: 	     132 kB
+	Tamaño de la memoria en la región TEXT: 	    2936 kB
+Número de cambios de contexto realizados (voluntarios): 	858
+Número de cambios de contexto realizados (no voluntarios): 	39
+

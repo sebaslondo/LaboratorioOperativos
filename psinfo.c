@@ -3,20 +3,21 @@
 #include <string.h>
 
 void procesos(char pid[200]);
-void procesos2(char pid[200],char archivo[1024]);
+void procesos_report(char pid[200],char archivo[1024]);
+char* substring(char string[1024],int inicio, int fin);
 
 int main (int argc,char **argv)
 {
     int c = 2;
 
-    if(strncmp(argv[1], "-l", 2) == 0){
+    if(strcmp(argv[1], "-l") == 0){
         while(c < argc){
             printf("Pid: %s\n",argv[c]);
             procesos(argv[c]);
             c++;
         }
     }
-    else if(strncmp(argv[1], "-r", 2) == 0){
+    else if(strcmp(argv[1], "-r") == 0){
         //psinfo-report-10898-1342.info
         char archivos[1024];
         strcpy(archivos,"psinfo-report");
@@ -34,436 +35,159 @@ int main (int argc,char **argv)
 
         c = 2;
         while(c < argc){
-            procesos2(argv[c],archivos);
+            procesos_report(argv[c],archivos);
             c++;
         }
+        printf("Archivo de salida generado: %s\n",archivos);
     }
-    else{
+    else if(argc == 2){
         procesos(argv[1]);
     }
-    return 0;
+    else{
+        printf("Parece que el numero de parametros es incorrecto, o esta ingresando una opcion que no es permitida\n");
+    }
+}
+
+char* substring(char* string,int inicio, int fin){
+    char *substring;
+    //Initial memory allocation
+    substring = (char *) malloc(sizeof(char)*fin+1);
+
+    int c = 0;
+    while (c < fin){
+        substring[c] = string[inicio + c];
+        c++;
+    }
+    return substring;
 }
 
 void procesos(char pid[200]){
-
-    FILE *fichero;
-    char linea[1024];
-
     //Archivo
+    FILE *fichero;
     char cadena[200];
     strcpy(cadena, "/proc/");
     strcat(cadena, pid);
     strcat(cadena, "/status");
-
     fichero = fopen(cadena, "r");
 
+    if (fichero == NULL){
+        printf("\nError, parece que este proceso no existe \n\n");
+        return;
+    }
+
+    char linea[1024];
     char sub[1024],resto[1024],vacio[1024];
-    int c = 0;
-
-    //Name:
     while(fgets(linea, 1024, (FILE*) fichero)) {
-        while (c < 5){
-            sub[c] = linea[c];
-            c++;
-        }
-        sub[c] = '\0';
-
-        while ( c < sizeof(linea)-1){
-            resto[c-5] = linea[c];
-            c++;
-        }
-
+        strcpy(sub,substring(linea,0,27));
+        //Name:
         if (strncmp(sub, "Name:", 5)==0){
+            strcpy(resto,substring(linea,5,sizeof(linea)));
             printf("El nombre del proceso es: %s", resto);
         }
-        c = 0;
-        strcpy(sub,vacio);
-    }
-    fclose(fichero);
-
-    //State:
-    fichero = fopen(cadena, "r");
-    while(fgets(linea, 1024, (FILE*) fichero)) {
-        while (c < 6){
-            sub[c] = linea[c];
-            c++;
-        }
-        sub[c] = '\0';
-
-        while ( c < sizeof(linea)-1){
-            resto[c-6] = linea[c];
-            c++;
-        }
-
-        if (strncmp(sub, "State:", 6)==0){
+        //State:
+        else if (strncmp(sub, "State:", 6)==0){
+            strcpy(resto,substring(linea,6,sizeof(linea)));
             printf("El estado del proceso es: %s", resto);
         }
-        c = 0;
-        strcpy(sub,vacio);
-    }
-    fclose(fichero);
-
-    //VmSize:
-    fichero = fopen(cadena, "r");
-    while(fgets(linea, 1024, (FILE*) fichero)) {
-        while (c < 7){
-            sub[c] = linea[c];
-            c++;
-        }
-        sub[c] = '\0';
-
-        while ( c < sizeof(linea)-1){
-            resto[c-7] = linea[c];
-            c++;
-        }
-
-        if (strncmp(sub, "VmSize:", 7)==0){
+        //VmSize:
+        else if (strncmp(sub, "VmSize:", 7)==0){
+            strcpy(resto,substring(linea,7,sizeof(linea)));
             printf("Tamaño total de la imagen de memoria: %s", resto);
         }
-        c = 0;
-        strcpy(sub,vacio);
-    }
-    fclose(fichero);
-
-    //VmExe:
-    fichero = fopen(cadena, "r");
-    while(fgets(linea, 1024, (FILE*) fichero)) {
-
-        while (c < 6){
-            sub[c] = linea[c];
-            c++;
-        }
-
-        sub[c] = '\0';
-
-        while ( c < sizeof(linea)-1){
-            resto[c-6] = linea[c];
-            c++;
-        }
-
-        if (strncmp(sub, "VmExe:", 6)==0){
+        //VmExe:
+        else if (strncmp(sub, "VmExe:", 6)==0){
+            strcpy(resto,substring(linea,6,sizeof(linea)));
             printf("\tTamaño de la memoria en la región TEXT: %s", resto);
         }
-
-        c = 0;
-        strcpy(sub,vacio);
-    }
-    fclose(fichero);
-
-    //VmData:
-    fichero = fopen(cadena, "r");
-    while(fgets(linea, 1024, (FILE*) fichero)) {
-        while (c < 7){
-            sub[c] = linea[c];
-            c++;
-        }
-        sub[c] = '\0';
-
-        while ( c < sizeof(linea)-1){
-            resto[c-7] = linea[c];
-            c++;
-        }
-
-        if (strncmp(sub, "VmData:", 7)==0){
+        //VmData:
+        else if (strncmp(sub, "VmData:", 7)==0){
+            strcpy(resto,substring(linea,7,sizeof(linea)));
             printf("\tTamaño de la memoria en la región DATA: %s", resto);
         }
-        c = 0;
-        strcpy(sub,vacio);
-    }
-    fclose(fichero);
-
-    //VmStk:
-    fichero = fopen(cadena, "r");
-    while(fgets(linea, 1024, (FILE*) fichero)) {
-        while (c < 6){
-            sub[c] = linea[c];
-            c++;
-        }
-        sub[c] = '\0';
-
-        while ( c < sizeof(linea)-1){
-            resto[c-6] = linea[c];
-            c++;
-        }
-
-        if (strncmp(sub, "VmStk:", 6)==0){
+        //VmStk:
+        else if (strncmp(sub, "VmStk:", 6)==0){
+            strcpy(resto,substring(linea,6,sizeof(linea)));
             printf("\tTamaño de la memoria en la región STACK: %s", resto);
         }
-        c = 0;
+        //voluntary_ctxt_switches: - nonvoluntary_ctxt_switches:
+        else if (strncmp(sub, "voluntary_ctxt_switches:", 24)==0){
+            strcpy(resto,substring(linea,24,sizeof(linea)));
+            printf("Número de cambios de contexto realizados (voluntarios): %s", resto);
+        }
+        else if (strncmp(sub, "nonvoluntary_ctxt_switches:", 27)==0){
+            strcpy(resto,substring(linea,27,sizeof(linea)));
+            printf("Número de cambios de contexto realizados (no voluntarios): %s\n", resto);
+        }
         strcpy(sub,vacio);
-    }
-    fclose(fichero);
-
-    //voluntary_ctxt_switches: - nonvoluntary_ctxt_switches:
-    fichero = fopen(cadena, "r");
-    char total[1024],total2[1024];
-    while(fgets(linea, 1024, (FILE*) fichero)) {
-
-        if (strncmp(total2, "voluntary_ctxt_switches:", 24)==0){
-            while (c < 27){
-                sub[c] = linea[c];
-                c++;
-            }
-            sub[c] = '\0';
-
-            while ( c < sizeof(linea)-950){
-                resto[c-27] = linea[c];
-                c++;
-            }
-
-            if (strncmp(sub, "nonvoluntary_ctxt_switches:", 27)==0){
-                strcat(total,resto);
-                printf("Número de cambios de contexto realizados (voluntarios - no voluntarios): %s\n", total);
-            }
-            c = 0;
-            strcpy(sub,vacio);
-        }
-        else{
-            while (c < 24){
-                sub[c] = linea[c];
-                c++;
-            }
-            sub[c] = '\0';
-
-            while ( c < sizeof(linea)-950){
-                resto[c-24] = linea[c];
-                c++;
-            }
-
-            if (strncmp(sub, "voluntary_ctxt_switches:", 24)==0){
-                strcpy(total,resto);
-                strcpy(total2,sub);
-                strcat(total," - ");
-            }
-            c = 0;
-            strcpy(sub,vacio);
-        }
+        strcpy(resto,vacio);
     }
     fclose(fichero);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//segunda funcion
-void procesos2(char pid[200],char archivo[1024]){
+//Funcion de reporte
+void procesos_report(char pid[200],char archivo[1024]){
     FILE *fp;
- 	fp = fopen (archivo, "r+" );
+ 	fp = fopen (archivo, "a+" );
     fprintf(fp,"Pid: %s\n",pid);
- 	
- 	//return;
-
-    FILE *fichero;
-    char linea[1024];
 
     //Archivo
+    FILE *fichero;
     char cadena[200];
     strcpy(cadena, "/proc/");
     strcat(cadena, pid);
     strcat(cadena, "/status");
-
     fichero = fopen(cadena, "r");
 
+    if (fichero == NULL){
+        fprintf(fp,"\nError, parece que este proceso no existe \n\n");
+        return;
+    }
+
+    char linea[1024];
     char sub[1024],resto[1024],vacio[1024];
-    int c = 0;
-
-    //Name:
     while(fgets(linea, 1024, (FILE*) fichero)) {
-        while (c < 5){
-            sub[c] = linea[c];
-            c++;
-        }
-        sub[c] = '\0';
-
-        while ( c < sizeof(linea)-1){
-            resto[c-5] = linea[c];
-            c++;
-        }
-
+        strcpy(sub,substring(linea,0,27));
+        //Name:
         if (strncmp(sub, "Name:", 5)==0){
+            strcpy(resto,substring(linea,5,sizeof(linea)));
             fprintf(fp,"El nombre del proceso es: %s", resto);
         }
-        c = 0;
-        strcpy(sub,vacio);
-    }
-    fclose(fichero);
-
-    //State:
-    fichero = fopen(cadena, "r");
-    while(fgets(linea, 1024, (FILE*) fichero)) {
-        while (c < 6){
-            sub[c] = linea[c];
-            c++;
-        }
-        sub[c] = '\0';
-
-        while ( c < sizeof(linea)-1){
-            resto[c-6] = linea[c];
-            c++;
-        }
-
-        if (strncmp(sub, "State:", 6)==0){
+        //State:
+        else if (strncmp(sub, "State:", 6)==0){
+            strcpy(resto,substring(linea,6,sizeof(linea)));
             fprintf(fp,"El estado del proceso es: %s", resto);
         }
-        c = 0;
-        strcpy(sub,vacio);
-    }
-    fclose(fichero);
-
-    //VmSize:
-    fichero = fopen(cadena, "r");
-    while(fgets(linea, 1024, (FILE*) fichero)) {
-        while (c < 7){
-            sub[c] = linea[c];
-            c++;
-        }
-        sub[c] = '\0';
-
-        while ( c < sizeof(linea)-1){
-            resto[c-7] = linea[c];
-            c++;
-        }
-
-        if (strncmp(sub, "VmSize:", 7)==0){
+        //VmSize:
+        else if (strncmp(sub, "VmSize:", 7)==0){
+            strcpy(resto,substring(linea,7,sizeof(linea)));
             fprintf(fp,"Tamaño total de la imagen de memoria: %s", resto);
         }
-        c = 0;
-        strcpy(sub,vacio);
-    }
-    fclose(fichero);
-
-    //VmExe:
-    fichero = fopen(cadena, "r");
-    while(fgets(linea, 1024, (FILE*) fichero)) {
-
-        while (c < 6){
-            sub[c] = linea[c];
-            c++;
-        }
-
-        sub[c] = '\0';
-
-        while ( c < sizeof(linea)-1){
-            resto[c-6] = linea[c];
-            c++;
-        }
-
-        if (strncmp(sub, "VmExe:", 6)==0){
+        //VmExe:
+        else if (strncmp(sub, "VmExe:", 6)==0){
+            strcpy(resto,substring(linea,6,sizeof(linea)));
             fprintf(fp,"\tTamaño de la memoria en la región TEXT: %s", resto);
         }
-
-        c = 0;
-        strcpy(sub,vacio);
-    }
-    fclose(fichero);
-
-    //VmData:
-    fichero = fopen(cadena, "r");
-    while(fgets(linea, 1024, (FILE*) fichero)) {
-        while (c < 7){
-            sub[c] = linea[c];
-            c++;
-        }
-        sub[c] = '\0';
-
-        while ( c < sizeof(linea)-1){
-            resto[c-7] = linea[c];
-            c++;
-        }
-
-        if (strncmp(sub, "VmData:", 7)==0){
+        //VmData:
+        else if (strncmp(sub, "VmData:", 7)==0){
+            strcpy(resto,substring(linea,7,sizeof(linea)));
             fprintf(fp,"\tTamaño de la memoria en la región DATA: %s", resto);
         }
-        c = 0;
-        strcpy(sub,vacio);
-    }
-    fclose(fichero);
-
-    //VmStk:
-    fichero = fopen(cadena, "r");
-    while(fgets(linea, 1024, (FILE*) fichero)) {
-        while (c < 6){
-            sub[c] = linea[c];
-            c++;
-        }
-        sub[c] = '\0';
-
-        while ( c < sizeof(linea)-1){
-            resto[c-6] = linea[c];
-            c++;
-        }
-
-        if (strncmp(sub, "VmStk:", 6)==0){
+        //VmStk:
+        else if (strncmp(sub, "VmStk:", 6)==0){
+            strcpy(resto,substring(linea,6,sizeof(linea)));
             fprintf(fp,"\tTamaño de la memoria en la región STACK: %s", resto);
         }
-        c = 0;
+        //voluntary_ctxt_switches: - nonvoluntary_ctxt_switches:
+        else if (strncmp(sub, "voluntary_ctxt_switches:", 24)==0){
+            strcpy(resto,substring(linea,24,sizeof(linea)));
+            fprintf(fp,"Número de cambios de contexto realizados (voluntarios): %s", resto);
+        }
+        else if (strncmp(sub, "nonvoluntary_ctxt_switches:", 27)==0){
+            strcpy(resto,substring(linea,27,sizeof(linea)));
+            fprintf(fp,"Número de cambios de contexto realizados (no voluntarios): %s\n", resto);
+        }
         strcpy(sub,vacio);
+        strcpy(resto,vacio);
     }
     fclose(fichero);
-
-    //voluntary_ctxt_switches: - nonvoluntary_ctxt_switches:
-    fichero = fopen(cadena, "r");
-    char total[1024],total2[1024];
-    while(fgets(linea, 1024, (FILE*) fichero)) {
-
-        if (strncmp(total2, "voluntary_ctxt_switches:", 24)==0){
-            while (c < 27){
-                sub[c] = linea[c];
-                c++;
-            }
-            sub[c] = '\0';
-
-            while ( c < sizeof(linea)-950){
-                resto[c-27] = linea[c];
-                c++;
-            }
-
-            if (strncmp(sub, "nonvoluntary_ctxt_switches:", 27)==0){
-                strcat(total,resto);
-                fprintf(fp,"Número de cambios de contexto realizados (voluntarios - no voluntarios): %s\n", total);
-            }
-            c = 0;
-            strcpy(sub,vacio);
-        }
-        else{
-            while (c < 24){
-                sub[c] = linea[c];
-                c++;
-            }
-            sub[c] = '\0';
-
-            while ( c < sizeof(linea)-950){
-                resto[c-24] = linea[c];
-                c++;
-            }
-
-            if (strncmp(sub, "voluntary_ctxt_switches:", 24)==0){
-                strcpy(total,resto);
-                strcpy(total2,sub);
-                strcat(total," - ");
-            }
-            c = 0;
-            strcpy(sub,vacio);
-        }
-    }
-    fclose(fichero);
-    fclose (fp);
+    fclose(fp);
 }
