@@ -18,23 +18,23 @@ int main (int argc,char **argv)
     }
     else if(strncmp(argv[1], "-r", 2) == 0){
         //psinfo-report-10898-1342.info
-        char archivo[1024];
-        strcpy(archivo,"psinfo-report");
+        char archivos[1024];
+        strcpy(archivos,"psinfo-report");
         while(c < argc){
-            strcat(archivo, "-");
-            strcat(archivo, argv[c]);
+            strcat(archivos, "-");
+            strcat(archivos, argv[c]);
             c++;
         }
-        strcat(archivo, ".info");
+        strcat(archivos, ".info");
 
         //Crear archivo
         FILE *fichero;
-        fichero = fopen(archivo, "w+");
+        fichero = fopen(archivos, "w+");
         fclose(fichero);
 
         c = 2;
         while(c < argc){
-            procesos2(argv[c],archivo);
+            procesos2(argv[c],archivos);
             c++;
         }
     }
@@ -242,18 +242,39 @@ void procesos(char pid[200]){
     fclose(fichero);
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//segunda funcion
 void procesos2(char pid[200],char archivo[1024]){
-    FILE *report;
-    printf("%s \n",archivo);
- 		
-    report = fopen(archivo, "a+"); //parametro para escritura al final y para file tipo texto
-
-    printf("Pid: %s\n",pid);
-
-    fprintf(report,"Pid: %s\n",pid);
+    FILE *fp;
+ 	fp = fopen (archivo, "r+" );
+    fprintf(fp,"Pid: %s\n",pid);
+ 	
+ 	//return;
 
     FILE *fichero;
     char linea[1024];
+
+    //Archivo
     char cadena[200];
     strcpy(cadena, "/proc/");
     strcat(cadena, pid);
@@ -278,11 +299,7 @@ void procesos2(char pid[200],char archivo[1024]){
         }
 
         if (strncmp(sub, "Name:", 5)==0){
-            strcpy(cadena,"El nombre del proceso es: ");
-            strcat(cadena,resto);
-            strcat(cadena,"\n");
-
-            fputs(cadena,report);
+            fprintf(fp,"El nombre del proceso es: %s", resto);
         }
         c = 0;
         strcpy(sub,vacio);
@@ -304,11 +321,7 @@ void procesos2(char pid[200],char archivo[1024]){
         }
 
         if (strncmp(sub, "State:", 6)==0){
-            strcpy(cadena,"El estado del proceso es: ");
-            strcat(cadena,resto);
-            strcat(cadena,"\n");
-
-            fputs(cadena,report);
+            fprintf(fp,"El estado del proceso es: %s", resto);
         }
         c = 0;
         strcpy(sub,vacio);
@@ -330,11 +343,7 @@ void procesos2(char pid[200],char archivo[1024]){
         }
 
         if (strncmp(sub, "VmSize:", 7)==0){
-            strcpy(cadena,"Tamaño total de la imagen de memoria: ");
-            strcat(cadena,resto);
-            strcat(cadena,"\n");
-
-            fputs(cadena,report);
+            fprintf(fp,"Tamaño total de la imagen de memoria: %s", resto);
         }
         c = 0;
         strcpy(sub,vacio);
@@ -358,11 +367,7 @@ void procesos2(char pid[200],char archivo[1024]){
         }
 
         if (strncmp(sub, "VmExe:", 6)==0){
-            strcpy(cadena,"\tTamaño de la memoria en la región TEXT: ");
-            strcat(cadena,resto);
-            strcat(cadena,"\n");
-
-            fputs(cadena,report);
+            fprintf(fp,"\tTamaño de la memoria en la región TEXT: %s", resto);
         }
 
         c = 0;
@@ -385,11 +390,7 @@ void procesos2(char pid[200],char archivo[1024]){
         }
 
         if (strncmp(sub, "VmData:", 7)==0){
-            strcpy(cadena,"\tTamaño de la memoria en la región DATA: ");
-            strcat(cadena,resto);
-            strcat(cadena,"\n");
-
-            fputs(cadena,report);
+            fprintf(fp,"\tTamaño de la memoria en la región DATA: %s", resto);
         }
         c = 0;
         strcpy(sub,vacio);
@@ -411,11 +412,7 @@ void procesos2(char pid[200],char archivo[1024]){
         }
 
         if (strncmp(sub, "VmStk:", 6)==0){
-            strcpy(cadena,"\tTamaño de la memoria en la región STACK: ");
-            strcat(cadena,resto);
-            strcat(cadena,"\n");
-
-            fputs(cadena,report);
+            fprintf(fp,"\tTamaño de la memoria en la región STACK: %s", resto);
         }
         c = 0;
         strcpy(sub,vacio);
@@ -441,11 +438,7 @@ void procesos2(char pid[200],char archivo[1024]){
 
             if (strncmp(sub, "nonvoluntary_ctxt_switches:", 27)==0){
                 strcat(total,resto);
-                strcpy(cadena,"Número de cambios de contexto realizados (voluntarios - no voluntarios): ");
-                strcat(cadena,total);
-                strcat(cadena,"\n");
-
-                fputs(cadena,report);
+                fprintf(fp,"Número de cambios de contexto realizados (voluntarios - no voluntarios): %s\n", total);
             }
             c = 0;
             strcpy(sub,vacio);
@@ -472,5 +465,5 @@ void procesos2(char pid[200],char archivo[1024]){
         }
     }
     fclose(fichero);
-    fclose(report);
+    fclose (fp);
 }
