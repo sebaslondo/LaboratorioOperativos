@@ -1,10 +1,14 @@
+// importacion de las librerias 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
+
+// declaracion de los metodos
 void procesos(char pid[200]);
 void procesos_report(char pid[200],char archivo[1024]);
 char* substring(char string[1024],int inicio, int fin);
+
 
 int main (int argc,char **argv)
 {
@@ -48,9 +52,14 @@ int main (int argc,char **argv)
     }
 }
 
+
 char* substring(char* string,int inicio, int fin){
     char *substring;
     //Initial memory allocation
+    /*
+    La función malloc reserva un bloque de memoria y devuelve un puntero void al inicio de la misma.
+     Tiene la siguiente definición:  malloc(size)  donde el parámetro size especifica el número de bytes a reservar.
+    */
     substring = (char *) malloc(sizeof(char)*fin+1);
 
     int c = 0;
@@ -61,24 +70,49 @@ char* substring(char* string,int inicio, int fin){
     return substring;
 }
 
+
 void procesos(char pid[200]){
     //Archivo
     FILE *fichero;
     char cadena[200];
+    // strcpy copia en parametro1 el contenido de parametro2
     strcpy(cadena, "/proc/");
+    //strcat concatena el parametro2 en el parametro1
     strcat(cadena, pid);
     strcat(cadena, "/status");
+    /*
+    fopen Esta función sirve para abrir y crear ficheros en disco.
+    esquema ---> fopen (const char *filename, const char *opentype);
+     el parametro "r" (como opentype) se usa: abrir un archivo para lectura, el fichero debe existir.
+    */
     fichero = fopen(cadena, "r");
+ 
 
     if (fichero == NULL){
         printf("\nError, parece que este proceso no existe \n\n");
         return;
     }
 
+    
     char linea[1024];
     char sub[1024],resto[1024],vacio[1024];
+
+
+    /*
+    Esta función está diseñada para leer cadenas de caracteres.
+    Leerá hasta n-1 caracteres o hasta que lea un cambio de línea '\n' o un final de archivo EOF.
+     En este último caso, el carácter de cambio de línea '\n' también es leído.
+	El prototipo correspondiente de fgets es: 	char *fgets(char *buffer, int tamaño, FILE *archivo);
+    */
+
     while(fgets(linea, 1024, (FILE*) fichero)) {
         strcpy(sub,substring(linea,0,27));
+
+        /*
+		strncmp (str1, str2, n) compara casi n caracteres de str2 a str1 lexicográficamente.
+ 		Devuelve un valor negativo si str1 <str2; 0 si str1 y str2 son idénticos; y valor positivo si str1> str2.
+        */
+
         //Name:
         if (strncmp(sub, "Name:", 5)==0){
             strcpy(resto,substring(linea,5,sizeof(linea)));
@@ -118,14 +152,22 @@ void procesos(char pid[200]){
             strcpy(resto,substring(linea,27,sizeof(linea)));
             printf("Número de cambios de contexto realizados (no voluntarios): %s\n", resto);
         }
+        
         strcpy(sub,vacio);
         strcpy(resto,vacio);
     }
     fclose(fichero);
 }
+
+
 //Funcion de reporte
 void procesos_report(char pid[200],char archivo[1024]){
     FILE *fp;
+
+    /*
+    "a +" Abre un archivo existente para leer y anexar.
+    Si un archivo con el nombre de archivo especificado actualmente no existe, se creará un nuevo archivo.
+ 	*/
  	fp = fopen (archivo, "a+" );
     fprintf(fp,"Pid: %s\n",pid);
 
@@ -144,6 +186,7 @@ void procesos_report(char pid[200],char archivo[1024]){
 
     char linea[1024];
     char sub[1024],resto[1024],vacio[1024];
+
     while(fgets(linea, 1024, (FILE*) fichero)) {
         strcpy(sub,substring(linea,0,27));
         //Name:
